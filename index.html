@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal Finance Pro Dashboard</title>
+<style>
+:root{
+  --pink:#e85b9b; --pink2:#f7d6e6; --green:#9bcf9b; --green2:#eaf6e8;
+  --deep:#743957; --bg:#f7f7f5; --card:#fff; --line:#e5e5e5; --text:#333;
+}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:Inter,Arial,sans-serif;color:var(--text)}
+.app{display:flex;min-height:100vh}.side{width:230px;background:#fff;border-right:1px solid var(--line);padding:22px 14px;position:sticky;top:0;height:100vh}
+.logo{font-weight:800;color:var(--deep);font-size:18px;padding:8px 10px 22px}.nav button{width:100%;text-align:left;border:0;background:transparent;padding:11px 12px;border-radius:10px;margin:2px 0;cursor:pointer;color:#555;font-size:14px}
+.nav button.active,.nav button:hover{background:var(--pink2);color:var(--deep);font-weight:700}
+.main{flex:1;padding:24px;max-width:1500px;margin:auto;width:100%}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:15px}.title h1{margin:0;font-size:25px;color:var(--deep)}.title p{margin:5px 0;color:#777}
+.yearbox{display:flex;align-items:center;gap:8px;background:#fff;padding:9px 12px;border:1px solid var(--line);border-radius:12px}
+select,input,textarea{border:1px solid #ddd;border-radius:7px;padding:8px;background:#fff;font:inherit}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 2px 10px #00000006}.label{font-size:12px;color:#777}.value{font-size:22px;font-weight:800;margin-top:7px;color:var(--deep)}
+.section{margin-top:18px}.section h2{font-size:16px;margin:0 0 10px;color:var(--deep)}
+.grid2{display:grid;grid-template-columns:1.5fr 1fr;gap:16px}.tablewrap{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:720px}th,td{border-bottom:1px solid #eee;padding:9px 10px;text-align:left;font-size:13px}th{background:#fafafa;color:#666;position:sticky;top:0}td.num{text-align:right}.negative{color:#c43d63;font-weight:700}.positive{color:#3e7d49;font-weight:700}.debtrow{background:#fff8f8}
+.monthgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;overflow:auto}.panel h3{margin:0 0 10px;color:var(--deep);font-size:14px}
+.btn{border:0;border-radius:8px;padding:8px 12px;cursor:pointer;background:var(--green);color:#173b1f;font-weight:700}.btn.pink{background:var(--pink2);color:var(--deep)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.muted{color:#888;font-size:12px}
+.tabs{display:flex;gap:6px;overflow:auto;margin-bottom:12px}.tabs button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 11px;cursor:pointer}.tabs button.active{background:var(--pink2);color:var(--deep);font-weight:700}
+.formrow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.empty{padding:40px;text-align:center;color:#999}
+.dashboard-brand{background:#172f55;color:#fff;border-radius:2px;padding:13px 18px;margin-bottom:10px;text-align:center}
+.dashboard-brand .brandname{font-family:Georgia,serif;font-size:27px;font-weight:800;letter-spacing:.5px}
+.dashboard-brand .subtitle{font-size:13px;margin-top:3px;opacity:.95}
+.dashboard-section-title{background:#173c68;color:#fff;text-align:center;font-weight:800;padding:5px 8px;border-radius:0;margin:0}
+.dashboard-table{background:#fff;border:1px solid #ddd;overflow:auto}
+.dashboard-table table{min-width:0}
+.dashboard-table th{background:#b04770;color:#fff}
+.dashboard-table td,.dashboard-table th{padding:7px 8px}
+.chartgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.chart-card{background:#fff;border:1px solid #ddd;padding:12px;min-height:285px}
+.chart-title{text-align:center;font-size:17px;font-weight:700;color:#707070;margin:3px 0 8px}
+.chart{width:100%;height:235px;display:block}
+.health-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.health-card{background:#fff;border:1px solid #ddd}
+.health-card .health-title{background:#173c68;color:#fff;text-align:center;font-weight:800;padding:5px}
+.health-row{display:grid;grid-template-columns:1.2fr 1fr;padding:6px 10px;border-bottom:1px solid #e6e6e6}
+.health-row b{text-align:right}
+.piewrap{display:flex;align-items:center;gap:18px;justify-content:center;height:235px}
+.pie{width:170px;height:170px;border-radius:50%;position:relative}
+.pie:after{content:"";position:absolute;inset:55px;background:#fff;border-radius:50%}
+.legend{font-size:12px;line-height:1.9}
+.legend span{display:inline-block;width:10px;height:10px;margin-right:6px}
+@media(max-width:900px){.chartgrid,.health-grid{grid-template-columns:1fr}}
+
+@media(max-width:1000px){.side{width:190px}.cards{grid-template-columns:repeat(2,1fr)}.monthgrid,.grid2{grid-template-columns:1fr}}
+@media(max-width:700px){.app{display:block}.side{position:static;width:auto;height:auto;border-right:0;border-bottom:1px solid var(--line)}.nav{display:flex;overflow:auto}.nav button{white-space:nowrap}.main{padding:14px}.cards{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side">
+  <div class="logo">PERSONAL FINANCE<br>PRO TRACKER</div>
+  <div class="nav">
+    <button data-page="dashboard" class="active">▦ Dashboard</button>
+    <button data-page="yearly">▤ Yearly Overview</button>
+    <button data-page="savings">♡ Savings</button>
+    <button data-page="monthly">▣ Monthly Tracker</button>
+  </div>
+  <div class="muted" style="padding:20px 10px">Editable • Auto-calculated<br>Data is saved in this browser.</div>
+</aside>
+<main class="main">
+  <div class="top">
+    <div class="title"><h1 id="pageTitle">PERSONAL FINANCE PRO DASHBOARD</h1><p>Income • Paid Bills • Expenses • Debt • Savings • Yearly Overview</p></div>
+    <div class="yearbox">REPORT YEAR <select id="year"></select></div>
+  </div>
+  <div id="content"></div>
+</main>
+</div>
+
+<script>
+const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const funds = ["Savings 1", "Savings 2", "Vehicle", "Emergency Fund"];
+let year = Number(localStorage.getItem("budgetYear") || 2026);
+let state = JSON.parse(localStorage.getItem("budgetState") || "{}");
+
+function key(){return year}
+function monthData(m){
+  state[key()] ||= {};
+  state[key()][m] ||= {income:[], bills:[], expenses:[], debt:[], savings:[0,0,0,0], extra:0};
+  return state[key()][m];
+}
+function save(){localStorage.setItem("budgetState",JSON.stringify(state)); render()}
+function money(n){return "₱"+Number(n||0).toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2})}
+function sum(a){return a.reduce((x,y)=>x+Number(y.amount||0),0)}
+function totals(m){
+  let d=monthData(m);
+  let income=sum(d.income), bills=sum(d.bills.filter(x=>x.paid)), expenses=sum(d.expenses), debt=sum(d.debt.filter(x=>x.paid));
+  let net=income-bills-expenses-debt;
+  // Automatic allocation is based on Paid-Only Net Available.
+  // 20% + 25% + 35% + 10% = 90% savings; the remaining 10% is next-month expense carryover.
+  let alloc = {
+    savings1: Math.max(0, net*0.20),
+    savings2: Math.max(0, net*0.25),
+    vehicle: Math.max(0, net*0.35),
+    emergency: Math.max(0, net*0.10),
+    expenseCarryover: Math.max(0, net*0.10)
+  };
+  return {income,bills,expenses,debt,net,alloc,savings:alloc.savings1+alloc.savings2+alloc.vehicle+alloc.emergency};
+}
+function allTotals(){
+  let t={income:0,bills:0,expenses:0,debt:0,savings:0,net:0};
+  months.forEach(m=>{let x=totals(m);Object.keys(t).forEach(k=>t[k]+=x[k])}); return t;
+}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function tableRows(arr,type){
+ return arr.map((x,i)=>`<tr><td>${i+1}</td><td><input value="${esc(x.desc||"")}" onchange="editItem('${type}',${i},'desc',this.value)"></td><td><input type="number" value="${Number(x.amount||0)}" onchange="editItem('${type}',${i},'amount',this.value)"></td>${type!=="income"&&type!=="expenses"?`<td><input type="checkbox" ${x.paid?"checked":""} onchange="editItem('${type}',${i},'paid',this.checked)"></td>`:""}<td><button class="btn pink" onclick="delItem('${type}',${i})">Delete</button></td></tr>`).join("");
+}
+function editItem(type,i,k,v){let d=monthData(currentMonth);d[type][i][k]=k==="amount"?Number(v):v;localStorage.setItem("budgetState",JSON.stringify(state));render()}
+function delItem(type,i){monthData(currentMonth)[type].splice(i,1);save()}
+function addItem(type){monthData(currentMonth)[type].push({desc:"",amount:0,paid:false});save()}
+let currentMonth=months[0];
+
+function dashboard(){
+ let t=allTotals();
+
+ // Dashboard-only chart helpers. These read existing monthly totals; they do not change calculations.
+ const monthly = months.map(m=>({m,...totals(m)}));
+ const maxOut = Math.max(1,...monthly.map(x=>Math.max(x.income,x.bills,x.expenses,x.debt)));
+ const maxTrend = Math.max(1,...monthly.map(x=>Math.max(Math.abs(x.net),x.savings)));
+ const escSvg = s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+ function bars(){
+   const W=560,H=235,left=48,right=12,top=12,bottom=40;
+   const plotW=W-left-right, plotH=H-top-bottom, step=plotW/months.length;
+   const colors=["#4f81bd","#c0504d","#9bbb59","#8064a2"];
+   let svg=`<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">`;
+   for(let g=0;g<=4;g++){
+     let y=top+plotH*g/4, val=maxOut*(1-g/4);
+     svg+=`<line x1="${left}" y1="${y}" x2="${W-right}" y2="${y}" stroke="#ddd"/>`;
+     svg+=`<text x="${left-6}" y="${y+4}" text-anchor="end" font-size="10" fill="#444">₱${Math.round(val).toLocaleString()}</text>`;
+   }
+   monthly.forEach((x,i)=>{
+     const base=top+plotH, groupX=left+i*step+step*.12, bw=step*.16;
+     [x.income,x.bills,x.expenses,x.debt].forEach((v,j)=>{
+       const h=(v/maxOut)*plotH, xx=groupX+j*(bw+2);
+       svg+=`<rect x="${xx}" y="${base-h}" width="${bw}" height="${h}" rx="1" fill="${colors[j]}"/>`;
+     });
+     svg+=`<text x="${left+i*step+step*.5}" y="${H-20}" text-anchor="middle" font-size="9" fill="#444" transform="rotate(-45 ${left+i*step+step*.5} ${H-20})">${escSvg(x.m)}</text>`;
+   });
+   svg+=`<g font-size="10"><rect x="${W-220}" y="8" width="10" height="10" fill="#4f81bd"/><text x="${W-206}" y="17">Income</text><rect x="${W-165}" y="8" width="10" height="10" fill="#c0504d"/><text x="${W-151}" y="17">Bills</text><rect x="${W-108}" y="8" width="10" height="10" fill="#9bbb59"/><text x="${W-94}" y="17">Expenses</text><rect x="${W-40}" y="8" width="10" height="10" fill="#8064a2"/><text x="${W-26}" y="17">Debt</text></g>`;
+   return svg+"</svg>";
+ }
+
+ function lineTrend(){
+   const W=560,H=235,left=48,right=12,top=20,bottom=40,plotW=W-left-right,plotH=H-top-bottom;
+   const xs=i=>left+(plotW*(months.length===1?0:i/(months.length-1)));
+   const y=v=>top+plotH/2-(v/maxTrend)*(plotH/2);
+   const netPts=monthly.map((x,i)=>`${xs(i)},${y(x.net)}`).join(" ");
+   const savPts=monthly.map((x,i)=>`${xs(i)},${y(x.savings)}`).join(" ");
+   let svg=`<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">`;
+   for(let g=-2;g<=2;g++){
+     let yy=top+plotH/2-(g/2)*(plotH/2);
+     let val=g*maxTrend/2;
+     svg+=`<line x1="${left}" y1="${yy}" x2="${W-right}" y2="${yy}" stroke="#ddd"/><text x="${left-6}" y="${yy+4}" text-anchor="end" font-size="10">₱${Math.round(val).toLocaleString()}</text>`;
+   }
+   svg+=`<polyline points="${netPts}" fill="none" stroke="#4f81bd" stroke-width="2.5"/><polyline points="${savPts}" fill="none" stroke="#c0504d" stroke-width="2.5"/>`;
+   monthly.forEach((x,i)=>{
+     svg+=`<text x="${xs(i)}" y="${H-20}" text-anchor="middle" font-size="9" transform="rotate(-45 ${xs(i)} ${H-20})">${escSvg(x.m)}</text>`;
+   });
+   svg+=`<g font-size="10"><line x1="${W-150}" y1="10" x2="${W-132}" y2="10" stroke="#4f81bd" stroke-width="3"/><text x="${W-126}" y="14">Net Available</text><line x1="${W-150}" y1="25" x2="${W-132}" y2="25" stroke="#c0504d" stroke-width="3"/><text x="${W-126}" y="29">Savings</text></g>`;
+   return svg+"</svg>";
+ }
+
+ const savVals=[
+   ["Savings 1",t.savings*0.20/0.90,"#4f81bd"],
+   ["Savings 2",t.savings*0.25/0.90,"#c0504d"],
+   ["Vehicle",t.savings*0.35/0.90,"#9bbb59"],
+   ["Emergency Fund",t.savings*0.10/0.90,"#8064a2"]
+ ];
+ const carry=t.savings*0.10/0.90;
+ const totalForPie=t.savings+carry;
+ let acc=0, stops=[];
+ savVals.forEach(x=>{let p=x[1]/totalForPie*100;stops.push(`${x[2]} ${acc}% ${acc+p}%`);acc+=p});
+ stops.push(`#4bacc6 ${acc}% 100%`);
+ const pie=`conic-gradient(${stops.join(",")})`;
+
+ const activity = funds.map((f,i)=>{
+   const rate=[.20,.25,.35,.10][i];
+   const auto=t.savings*rate/.90;
+   const manual=JSON.parse(localStorage.getItem("manualSavings"+year)||"[]");
+   let dep=0,withd=0;
+   manual.forEach(x=>{if(x.fund===f){if(x.type==="Deposit")dep+=Number(x.amount);else withd+=Number(x.amount)}});
+   return {f,dep,withd,current:auto+dep-withd};
+ });
+ const activityTotal=activity.reduce((a,x)=>a+x.current,0);
+
+ return `
+ <div class="dashboard-brand">
+   <div class="brandname">BHEL FINANCE TRACKER • ${year}</div>
+   <div class="subtitle">Income • Paid Bills • Expenses • Debt • Savings • Yearly Overview</div>
+ </div>
+
+ <div class="cards">
+  ${card("TOTAL INCOME",t.income)}${card("TOTAL PAID BILLS",t.bills)}${card("TOTAL DEBT PAID",t.debt)}${card("TOTAL EXPENSES",t.expenses)}
+  ${card("NET AVAILABLE",t.net)}${card("TOTAL SAVINGS",t.savings)}${card("AVG MONTHLY INCOME",t.income/12)}${card("YEARLY SHORTFALL",Math.max(0,-t.net))}
+ </div>
+
+ <div class="section dashboard-table">
+   <div class="dashboard-section-title">SAVINGS ACTIVITY</div>
+   <table><thead><tr><th>Fund</th><th>Deposits</th><th>Withdrawals</th><th>Current Balance</th></tr></thead><tbody>
+   ${activity.map(x=>`<tr><td>${x.f}</td><td class="num">${money(x.dep)}</td><td class="num">${money(x.withd)}</td><td class="num"><b>${money(x.current)}</b></td></tr>`).join("")}
+   <tr><th>TOTAL</th><th class="num">${money(activity.reduce((a,x)=>a+x.dep,0))}</th><th class="num">${money(activity.reduce((a,x)=>a+x.withd,0))}</th><th class="num">${money(activityTotal)}</th></tr>
+   </tbody></table>
+ </div>
+
+ <div class="chartgrid">
+   <div class="chart-card"><div class="chart-title">Monthly Income vs Outflows</div>${bars()}</div>
+   <div class="chart-card"><div class="chart-title">Net Available & Savings Trend</div>${lineTrend()}</div>
+ </div>
+
+ <div class="health-grid">
+   <div class="chart-card">
+     <div class="chart-title">Yearly Savings Distribution</div>
+     <div class="piewrap"><div class="pie" style="background:${pie}"></div>
+       <div class="legend">
+         <div><span style="background:#4f81bd"></span>Savings 1</div>
+         <div><span style="background:#c0504d"></span>Savings 2</div>
+         <div><span style="background:#9bbb59"></span>Vehicle</div>
+         <div><span style="background:#8064a2"></span>Emergency Fund</div>
+         <div><span style="background:#4bacc6"></span>Carryover / Extra Expenses</div>
+       </div>
+     </div>
+   </div>
+   <div class="health-card">
+     <div class="health-title">BUDGET HEALTH • PRO</div>
+     <div class="health-row"><span>PAID-ONLY NET AVAILABLE</span><b>${money(t.net)}</b></div>
+     <div class="health-row"><span>ALL ENTERED OBLIGATIONS</span><b>${money(t.bills+t.expenses+t.debt)}</b></div>
+     <div class="health-row"><span>PROJECTED BALANCE</span><b class="${t.net<0?'negative':''}">${money(t.income-t.bills-t.expenses-t.debt)}</b></div>
+     <div class="health-row"><span>PROJECTED SHORT / NEGATIVE</span><b class="${t.net<0?'negative':''}">${money(Math.max(0,-t.net))}</b></div>
+     <div class="health-row"><span>YEARLY SAVINGS</span><b>${money(t.savings)}</b></div>
+     <div class="health-row"><span>YEARLY SHORTFALL</span><b class="${t.net<0?'negative':''}">${money(Math.max(0,-t.net))}</b></div>
+   </div>
+ </div>
+
+ <div class="section"><div class="dashboard-section-title">MONTHLY FINANCIAL PERFORMANCE • SELECTED YEAR</div>
+ <div class="dashboard-table"><table><thead><tr><th>Month</th><th>Income</th><th>Bills</th><th>Expenses</th><th>Debt</th><th>Net Available</th><th>Savings</th></tr></thead><tbody>
+ ${months.map(m=>{let x=totals(m);return `<tr><td>${m}</td><td class="num">${money(x.income)}</td><td class="num">${money(x.bills)}</td><td class="num">${money(x.expenses)}</td><td class="num">${money(x.debt)}</td><td class="num ${x.net<0?'negative':'positive'}">${money(x.net)}</td><td class="num">${money(x.savings)}</td></tr>`}).join("")}</tbody></table></div></div>
+ `;
+}
+function card(l,v){return `<div class="card"><div class="label">${l}</div><div class="value">${money(v)}</div></div>`}
+
+function yearly(){
+ let t=allTotals();
+ return `<div class="cards">${card("YEARLY INCOME",t.income)}${card("YEARLY PAID BILLS",t.bills)}${card("YEARLY EXPENSES",t.expenses)}${card("YEARLY PAID DEBT",t.debt)}</div>
+ <div class="section tablewrap"><table><thead><tr><th>Month</th><th>Income</th><th>Paid Bills</th><th>Expenses</th><th>Paid Debt</th><th>Net Available</th><th>Total Savings</th></tr></thead><tbody>
+ ${months.map(m=>{let x=totals(m);return `<tr><td>${m}</td><td class="num">${money(x.income)}</td><td class="num">${money(x.bills)}</td><td class="num">${money(x.expenses)}</td><td class="num">${money(x.debt)}</td><td class="num ${x.net<0?'negative':'positive'}">${money(x.net)}</td><td class="num">${money(x.savings)}</td></tr>`}).join("")}
+ <tr><th>YEAR TOTAL</th><th>${money(t.income)}</th><th>${money(t.bills)}</th><th>${money(t.expenses)}</th><th>${money(t.debt)}</th><th>${money(t.net)}</th><th>${money(t.savings)}</th></tr></tbody></table></div>
+ <div class="section panel"><h3>YEARLY NOTES / MANUAL OVERVIEW</h3><textarea id="yearNote" style="width:100%;min-height:110px" placeholder="Enter your yearly notes here...">${esc(state[key()]?.yearNote||"")}</textarea><br><button class="btn" onclick="state[key()] ||= {};state[key()].yearNote=document.getElementById('yearNote').value;save()">Save Notes</button></div>`;
+}
+
+function savings(){
+ let manual = JSON.parse(localStorage.getItem("manualSavings"+year)||"[]");
+ let bal={};funds.forEach(f=>bal[f]={dep:0,with:0});
+ manual.forEach(x=>{if(bal[x.fund]) x.type==="Deposit"?bal[x.fund].dep+=Number(x.amount):bal[x.fund].with+=Number(x.amount)});
+ let t=allTotals();
+ let rates=[0.20,0.25,0.35,0.10];
+ return `<div class="cards">${funds.map((f,i)=>{
+   let auto=t.savings*rates[i]/0.90;
+   let current=auto+(bal[f]?.dep||0)-(bal[f]?.with||0);
+   return card(f,current);
+ }).join("")}</div>
+ <div class="section panel"><h3>AUTOMATIC YEARLY SAVINGS ALLOCATION</h3>
+ <div class="tablewrap"><table><thead><tr><th>Fund</th><th>Percentage</th><th>Automatic Amount</th><th>Manual Deposits</th><th>Withdrawals</th><th>Current Balance</th></tr></thead><tbody>
+ ${funds.map((f,i)=>{
+   let auto=t.savings*rates[i]/0.90;
+   let current=auto+(bal[f]?.dep||0)-(bal[f]?.with||0);
+   return `<tr><td>${f}</td><td>${[20,25,35,10][i]}%</td><td class="num">${money(auto)}</td><td class="num">${money(bal[f]?.dep||0)}</td><td class="num">${money(bal[f]?.with||0)}</td><td class="num"><b>${money(current)}</b></td></tr>`;
+ }).join("")}
+ <tr><th>TOTAL SAVINGS</th><th>90%</th><th>${money(t.savings)}</th><th>${money(manual.reduce((a,x)=>a+(x.type==="Deposit"?Number(x.amount):0),0))}</th><th>${money(manual.reduce((a,x)=>a+(x.type==="Withdrawal"?Number(x.amount):0),0))}</th><th>${money(t.savings+manual.reduce((a,x)=>a+(x.type==="Deposit"?Number(x.amount):-Number(x.amount)),0))}</th></tr>
+ </tbody></table></div>
+ <div class="muted" style="margin-top:8px">Automatic savings are calculated from each month's Paid-Only Net Available. 20% + 25% + 35% + 10% = 90%. The remaining 10% is Next Month Carryover.</div></div>
+ <div class="section panel"><h3>SAVINGS TRANSACTION ENTRY</h3>
+ <div class="formrow"><input type="date" id="sd"><select id="sf">${funds.map(f=>`<option>${f}</option>`).join("")}</select><select id="st"><option>Deposit</option><option>Withdrawal</option></select><input type="number" id="sa" placeholder="Amount"></div>
+ <div class="actions"><button class="btn" onclick="addSavings()">Add Transaction</button></div>
+ <div class="tablewrap"><table><thead><tr><th>Date</th><th>Fund</th><th>Type</th><th>Amount</th><th>Reference / Purpose</th><th></th></tr></thead><tbody>
+ ${manual.map((x,i)=>`<tr><td>${esc(x.date)}</td><td>${esc(x.fund)}</td><td>${esc(x.type)}</td><td>${money(x.amount)}</td><td>${esc(x.note||"")}</td><td><button class="btn pink" onclick="delSavings(${i})">Delete</button></td></tr>`).join("")||`<tr><td colspan="6" class="empty">No manual savings transactions yet.</td></tr>`}
+ </tbody></table></div></div>`;
+}
+function addSavings(){let a=Number(document.getElementById("sa").value||0);if(!a)return;let arr=JSON.parse(localStorage.getItem("manualSavings"+year)||"[]");arr.push({date:document.getElementById("sd").value,fund:document.getElementById("sf").value,type:document.getElementById("st").value,amount:a,note:""});localStorage.setItem("manualSavings"+year,JSON.stringify(arr));render()}
+function delSavings(i){let a=JSON.parse(localStorage.getItem("manualSavings"+year)||"[]");a.splice(i,1);localStorage.setItem("manualSavings"+year,JSON.stringify(a));render()}
+
+function monthly(){
+ let d=monthData(currentMonth), x=totals(currentMonth);
+ return `<div class="tabs">${months.map(m=>`<button class="${m===currentMonth?'active':''}" onclick="currentMonth='${m}';render()">${m}</button>`).join("")}</div>
+ <div class="cards">${card("TOTAL INCOME",x.income)}${card("TOTAL PAID BILLS",x.bills)}${card("TOTAL EXPENSES",x.expenses)}${card("TOTAL PAID DEBT",x.debt)}${card("NET AVAILABLE",x.net)}${card("NEXT MONTH CARRYOVER",x.alloc.expenseCarryover)}</div>
+ <div class="monthgrid section">
+  ${entryPanel("income","MY INCOME",false)}
+  ${entryPanel("bills","BILLS",true)}
+  ${entryPanel("expenses","EXPENSES",false)}
+  ${entryPanel("debt","DEBT",true)}
+ </div>
+ <div class="section panel">
+   <h3>DEBT TRACKING RULE</h3>
+   <div class="muted">Enter every debt/payment for this month. The amount is included in <b>Total Debt</b> when marked <b>Paid</b>. Unpaid debt remains visible but does not reduce Paid-Only Net Available.</div>
+ </div>
+ <div class="section panel"><h3>AUTOMATIC SAVINGS ALLOCATION • ${currentMonth}</h3>
+   <div class="tablewrap"><table style="min-width:0"><thead><tr><th>Fund</th><th>%</th><th>Automatic Amount</th><th>Purpose</th></tr></thead><tbody>
+   <tr><td>Savings 1</td><td>20%</td><td class="num"><b>${money(x.alloc.savings1)}</b></td><td>General savings</td></tr>
+   <tr><td>Savings 2</td><td>25%</td><td class="num"><b>${money(x.alloc.savings2)}</b></td><td>Second savings</td></tr>
+   <tr><td>Vehicle</td><td>35%</td><td class="num"><b>${money(x.alloc.vehicle)}</b></td><td>Vehicle fund</td></tr>
+   <tr><td>Emergency Fund</td><td>10%</td><td class="num"><b>${money(x.alloc.emergency)}</b></td><td>Emergency fund</td></tr>
+   <tr><td><b>Expenses</b></td><td><b>10%</b></td><td class="num"><b>${money(x.alloc.expenseCarryover)}</b></td><td><b>NEXT MONTH CARRYOVER</b></td></tr>
+   <tr><th>TOTAL</th><th>100%</th><th class="num">${money(x.net)}</th><th>90% savings + 10% carryover</th></tr>
+   </tbody></table></div>
+   <div class="muted" style="margin-top:8px">Automatic: Net Available × percentage. Allocation updates immediately when income, paid bills, expenses or paid debt changes.</div>
+ </div>
+ <div class="section panel"><h3>EXTRA EXPENSES CARRYOVER</h3><input type="number" value="${Number(d.extra||0)}" onchange="monthData(currentMonth).extra=Number(this.value||0);localStorage.setItem('budgetState',JSON.stringify(state));render()"><span class="muted"> Manual carryover amount for this month.</span></div>`;
+}
+function entryPanel(type,title,paid){
+ let d=monthData(currentMonth);
+ return `<div class="panel"><h3>${title}</h3><table style="min-width:0"><thead><tr><th>#</th><th>Description</th><th>Amount</th>${paid?'<th>Paid</th>':''}<th></th></tr></thead><tbody>${tableRows(d[type],type)}</tbody></table><button class="btn" onclick="addItem('${type}')">+ Add</button></div>`;
+}
+
+function render(){
+ document.getElementById("year").value=year;
+ let p=document.querySelector(".nav button.active")?.dataset.page||"dashboard";
+ document.getElementById("pageTitle").textContent=p==="dashboard"?"PERSONAL FINANCE PRO DASHBOARD":p==="yearly"?"YEARLY OVERVIEW":p==="savings"?"SAVINGS TRANSACTION TRACKER":"MONTHLY BUDGET TRACKER";
+ document.getElementById("content").innerHTML=p==="dashboard"?dashboard():p==="yearly"?yearly():p==="savings"?savings():monthly();
+}
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");render()});
+let ys=document.getElementById("year");for(let y=2026;y<=2045;y++)ys.innerHTML+=`<option>${y}</option>`;
+ys.onchange=()=>{year=Number(ys.value);localStorage.setItem("budgetYear",year);render()};
+render();
+</script>
+</body>
+</html>
